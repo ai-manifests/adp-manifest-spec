@@ -432,6 +432,110 @@ harder to pass. The rational strategy is honest declaration.
 > journal and tune accordingly. The journal spec (forthcoming) will define
 > metrics for detecting systematic over-declaration.
 
+### 5.4 Weight Caps
+
+No single agent's weight in a deliberation MAY exceed a configurable maximum
+fraction of total deliberation weight. The default cap is **35%**.
+
+```
+effective_weight(agent) = min(weight(agent), cap × total_deliberation_weight)
+```
+
+If an agent's computed weight exceeds the cap, the excess is discarded — it
+does not redistribute to other agents. This prevents any agent, no matter how
+well-calibrated, from single-handedly deciding outcomes.
+
+Weight caps serve a structural purpose: they ensure that the calibration
+meritocracy produces *influence*, not *dominance*. A well-calibrated agent
+should have the most weight in the room, but not so much that other agents'
+votes are irrelevant.
+
+Implementations SHOULD make the cap configurable per deliberation. Lower caps
+(e.g., 20%) produce more egalitarian deliberations. Higher caps (e.g., 50%)
+allow more authority-driven outcomes. The 35% default means at least three
+agents with significant weight are needed for convergence.
+
+### 5.5 Domain Delegation
+
+When a deliberation in a decision class attracts more than a configurable
+maximum number of participants (default: **12**), the system SHOULD activate
+domain delegation to prevent epistemic overload.
+
+**Delegation flow:**
+
+1. The initiating agent discovers N peers for a deliberation where N > 12.
+2. Agents are ranked by weight in the deliberation's decision class.
+3. The top 12 agents participate directly.
+4. Remaining agents are grouped into a **delegation cluster**.
+5. The delegation cluster runs an internal ADP deliberation (same action,
+   same tier) among its members.
+6. The cluster produces a single **delegation proposal** — a synthetic
+   proposal whose vote is the cluster's converged outcome, whose confidence
+   is the cluster's approval fraction, and whose weight is the sum of the
+   cluster members' weights (subject to the weight cap).
+7. The delegation proposal participates in the main deliberation as a single
+   voice.
+
+Delegation is recursive: if the cluster itself has more than 12 members, it
+delegates internally. In practice, two levels of delegation support
+deliberations with up to 144 agents (12 × 12), and three levels support
+1,728 — well beyond any foreseeable need.
+
+**This is the mechanism that produces natural hierarchy.** High-weight agents
+participate directly. Lower-weight agents influence outcomes through their
+cluster's delegation vote. Authority is earned through calibration, bounded
+by weight caps, and structured through delegation — not imposed by fiat.
+
+**Delegation metadata** is recorded in the journal. The `deliberation_opened`
+entry includes a `delegations` field listing which agents were delegated and
+which cluster they joined:
+
+```json
+"delegations": [
+  {
+    "cluster_id": "dlg_01",
+    "members": ["did:adp:agent-13", "did:adp:agent-14", "did:adp:agent-15"],
+    "representative_proposal_id": "prp_dlg_01",
+    "internal_deliberation_id": "dlb_internal_01"
+  }
+]
+```
+
+---
+
+## 5.6 Federation Health Metrics
+
+Deployments SHOULD monitor the following metrics to detect structural
+degradation as the federation grows. These are computed from journal data
+and do not require protocol changes.
+
+| Metric | What it measures | Warning threshold |
+|---|---|---|
+| **Weight concentration (Gini coefficient)** | How evenly weight is distributed across active agents. 0 = perfectly equal, 1 = one agent holds all weight. | > 0.6 |
+| **New agent integration rate** | Number of deliberations a new agent needs before its weight exceeds 10% of the median active weight. | > 50 deliberations |
+| **Deliberation efficiency** | Average rounds per deliberation, trending over time. | Increasing trend over 30-day window |
+| **Quorum failure rate** | Fraction of deliberations that fail the participation floor. | > 15% |
+| **Calibration mobility** | Standard deviation of weight changes per agent per month. 0 = static hierarchy. | < 0.02 (hierarchy has calcified) |
+| **Delegation frequency** | Fraction of deliberations that activate domain delegation. | > 50% (federation may be too large for the domain structure) |
+
+**Weight concentration** is the most important single metric. A federation
+where three agents hold 80% of the weight is functioning as a committee, not
+a deliberation. The weight cap (Section 5.4) prevents the most extreme cases,
+but the Gini coefficient catches subtler concentration patterns.
+
+**Calibration mobility** detects the entrenchment failure mode: early agents
+accumulate weight and stop changing. If mobility drops below the threshold,
+the calibration loop has stalled — agents are no longer learning from outcomes,
+or outcomes have stopped being recorded. Either is a systemic problem.
+
+> **Emergent Hierarchy**
+>
+> ADP is designed to produce hierarchy through competence, not assignment.
+> Weight caps prevent domination. Delegation prevents overload. Calibration
+> decay prevents entrenchment. Health metrics detect degradation. The result
+> is a system where authority is earned, bounded, structured, and monitored —
+> the properties that distinguish a healthy organization from a calcified one.
+
 ---
 
 ## 6. The Belief-Update Round
@@ -993,6 +1097,41 @@ weight without submitting to the accountability loop.
 The journal SHOULD track opt-out frequency per agent. An agent that opts out
 of more than 20% of deliberations SHOULD see its domain authority discounted.
 The exact mechanism is a journal-spec concern.
+
+### 11.7 Delegation Cluster Formation
+
+When domain delegation (Section 5.5) is activated, agents must be assigned to
+clusters. v0 uses a simple strategy: rank by weight, top N participate
+directly, remainder form one cluster. More sophisticated strategies are
+possible:
+
+- **Affinity-based clustering.** Group agents whose historical votes
+  correlate, producing clusters with internal coherence.
+- **Adversarial pairing.** Ensure each cluster contains at least one agent
+  that frequently dissents, preventing groupthink in delegation votes.
+- **Geographic clustering.** For latency-sensitive deliberations, group
+  agents by network proximity.
+
+The clustering strategy is implementation-defined. The spec requires only
+that the delegation metadata is recorded in the journal (ADJ §3.1) and that
+the internal deliberation follows the same ADP protocol as the parent.
+
+### 11.8 Weight Cap Tuning
+
+The default weight cap of 35% (Section 5.4) is a starting point. The optimal
+cap depends on the federation's size and trust model:
+
+- **High-trust, small federation (5-10 agents):** 50% cap is appropriate.
+  Agents know each other and a strong authority should have strong influence.
+- **Medium-trust, growing federation (10-50 agents):** 35% default. Prevents
+  any single agent from dominating while allowing calibration to differentiate.
+- **Low-trust, open federation (50+ agents):** 20% cap. Forces broader
+  consensus and makes sybil attacks less effective (attacker needs to
+  compromise more agents to control outcomes).
+
+The cap SHOULD be configurable per deliberation and MAY be adjusted based on
+the reversibility tier — irreversible decisions could use a lower cap to
+require broader agreement.
 
 ---
 
