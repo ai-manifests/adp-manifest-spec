@@ -214,6 +214,12 @@ about it programmatically. The three sub-fields — scope, estimated users
 affected, rollback cost — are the minimum viable triple: enough to compare
 proposals, not so much that agents cannot fill them in honestly.
 
+**`justification.evidence_refs`** uses URIs to point at supporting evidence.
+The `journal:` URI scheme is defined in ADJ Section 3.6 and resolves to
+journal entries via the query contract. Non-journal evidence (CI systems,
+external monitoring) uses implementation-specific schemes (e.g., `ci:`,
+`scan:`, `monitoring:`).
+
 **`dissent_conditions`** pre-declares what would change this agent's vote.
 This means the belief-update round has something concrete to operate on instead
 of free-form argument. It is the closest thing in the schema to "shared
@@ -251,6 +257,13 @@ entry in `revisions`, or the original `vote` if `revisions` is empty.
 Votes are not equal. An agent's weight in a deliberation is a function of its
 domain authority, calibration history, the staleness of that history, and its
 declared stake.
+
+**Graceful degradation.** Calibration is optional. ADP without ADJ degrades
+gracefully to equal-weight voting plus domain authority: when no
+CalibrationSource is available, the `calibration` and `decay` terms default
+to 1.0, and the weighting function reduces to `authority × stake_factor`.
+This means ADP is deployable before a journal exists, and gains the
+calibration loop when one becomes available.
 
 ### 4.1 Formula
 
