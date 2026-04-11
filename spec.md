@@ -868,7 +868,7 @@ previous one. Partial adopters can exist without breaking the protocol.
 | Level | Name | Requirements |
 |---|---|---|
 | **Level 1** | Proposer | MUST emit valid proposal objects per Section 3 schema. MAY participate in belief-update rounds but is not required to respond to falsification. |
-| **Level 2** | Participant | MUST meet Level 1. MUST participate in belief-update rounds: respond to falsification attempts within timeout (acknowledge, reject, or amend). MUST respond to tier challenges if targeted. |
+| **Level 2** | Participant | MUST meet Level 1. MUST sign proposals with Ed25519 (Section 12.3). MUST participate in belief-update rounds: respond to falsification attempts within timeout (acknowledge, reject, or amend). MUST respond to tier challenges if targeted. |
 | **Level 3** | Calibrated | MUST meet Level 2. MUST maintain calibration history via a CalibrationSource. MUST submit to calibration scoring of resolved deliberations. MUST set `calibration_at_stake: true` for at least 80% of deliberations joined. |
 
 Level 1 lets agents participate in the outcome without the overhead of
@@ -1061,15 +1061,27 @@ Discovery is "fetch the well-known URI." This is the same pattern as
 
 ### 12.3 Proposal Signing
 
-Proposals SHOULD be signed by the submitting agent using the key declared in
-its manifest. Signatures enable:
+Proposals MUST be signed by the submitting agent using the Ed25519 key
+declared in its manifest for Level 2 and Level 3 compliance. Level 1
+(Proposer) agents MAY omit signatures but SHOULD expect that unsigned
+proposals will be rejected by peers operating at Level 2+.
+
+Signatures enable:
 
 - **Authenticity.** The proposal was submitted by the claimed agent.
 - **Integrity.** The proposal was not modified after submission.
 - **Non-repudiation.** The agent cannot deny having submitted the proposal.
 
+The signed proposal includes a `signature` field containing the hex-encoded
+Ed25519 signature over the canonicalized proposal JSON (sorted keys, no
+whitespace, `signature` field excluded from the canonical form).
+
 Signature verification chains to the agent's manifest, which chains to the
 domain's TLS certificate or DID document. No new trust root is required.
+
+Peers MUST verify signatures on received proposals before accepting them
+into a deliberation. Proposals with invalid or missing signatures from
+remote peers (i.e., not on the same host) MUST be rejected.
 
 ### 12.4 Federated Calibration
 
