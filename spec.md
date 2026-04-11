@@ -20,6 +20,9 @@ structure of proposals agents emit, the function that weights their votes, the
 rules that determine convergence, and the belief-update protocol agents follow
 when initial votes do not converge.
 
+ADP is designed for federated deployment without central coordination; see
+Section 12.
+
 ### 1.2 Design Principle
 
 Good protocol design makes defection legible.
@@ -990,6 +993,113 @@ weight without submitting to the accountability loop.
 The journal SHOULD track opt-out frequency per agent. An agent that opts out
 of more than 20% of deliberations SHOULD see its domain authority discounted.
 The exact mechanism is a journal-spec concern.
+
+---
+
+## 12. Discovery and Federation
+
+ADP requires no central registry. Discovery, identity, and trust are
+bootstrapped from existing web infrastructure.
+
+### 12.1 Agent Identity
+
+An agent's identity is a domain it controls or a DID that resolves to one.
+The canonical form is `did:web:agent.example.com`, which bridges cleanly to
+domain-based discovery. Agents without domains MAY use other DID methods, but
+`did:web` is the RECOMMENDED default because it chains to existing web PKI.
+
+The `agent_id` field in proposals (`did:adp:agent-name`) is a logical
+identifier. Implementations MUST be able to resolve it to a discovery endpoint
+(via DID resolution or domain lookup) for federation to work.
+
+### 12.2 Well-Known Manifest
+
+An agent declares its ADP participation at:
+
+```
+https://agent.example.com/.well-known/adp-manifest.json
+```
+
+The manifest includes:
+
+```json
+{
+  "$schema": "https://adp-manifest.dev/schemas/manifest/v0.json",
+  "agent_id": "did:adp:test-runner-v2",
+  "identity": "did:web:test-runner.example.com",
+  "compliance_level": 3,
+  "decision_classes": ["code.correctness", "code.coverage"],
+  "domain_authorities": {
+    "code.correctness": {
+      "authority": 0.90,
+      "source": "mcp-manifest:test-runner-v2#authorities"
+    }
+  },
+  "journal_endpoint": "https://test-runner.example.com/adj/v0",
+  "public_key": {
+    "kty": "OKP",
+    "crv": "Ed25519",
+    "x": "..."
+  },
+  "signing_algorithm": "EdDSA"
+}
+```
+
+| Field | Description |
+|---|---|
+| `identity` | Verifiable identifier (DID or domain). |
+| `compliance_level` | ADP compliance level (1, 2, or 3). |
+| `decision_classes` | Domains this agent participates in. |
+| `domain_authorities` | Declared authority per domain, referencing mcp-manifest. |
+| `journal_endpoint` | URL serving the ADJ query contract. Used by peers to fetch calibration scores. |
+| `public_key` | Public key for proposal signature verification. |
+| `signing_algorithm` | Algorithm used to sign proposals. |
+
+Discovery is "fetch the well-known URI." This is the same pattern as
+`.well-known/openid-configuration`, `.well-known/matrix/server`, and
+`.well-known/acme-challenge`.
+
+### 12.3 Proposal Signing
+
+Proposals SHOULD be signed by the submitting agent using the key declared in
+its manifest. Signatures enable:
+
+- **Authenticity.** The proposal was submitted by the claimed agent.
+- **Integrity.** The proposal was not modified after submission.
+- **Non-repudiation.** The agent cannot deny having submitted the proposal.
+
+Signature verification chains to the agent's manifest, which chains to the
+domain's TLS certificate or DID document. No new trust root is required.
+
+### 12.4 Federated Calibration
+
+When Agent A needs to weight Agent B's vote:
+
+1. A fetches B's manifest from `https://b.example.com/.well-known/adp-manifest.json`.
+2. A reads B's `journal_endpoint`.
+3. A queries `getCalibration(B, decision_class)` at B's journal endpoint.
+4. A receives the `{value, sample_size, staleness}` triple.
+
+B is reporting its own calibration, which is a gaming vector unless mitigated.
+ADJ's mitigations (Section 8 append-only guarantee, hash chaining, external
+evidence refs in outcome entries) make retroactive tampering detectable. An
+agent that lies about its calibration leaves a trail any peer can audit by
+replaying the log. Trust-but-verify, federated, no central authority.
+
+### 12.5 Cross-Organization Deployment
+
+Internal deployments use internal domains with the same pattern. Cross-org
+federation works because the protocol is federation-native:
+
+- No central registry — discovery is DNS + HTTPS.
+- No snowflake configs — the manifest schema is fixed and published.
+- No new trust root — identity chains to web PKI or DIDs.
+- No shared substrate — each agent owns its own journal and serves it on
+  request.
+
+An agent that joins a new organization brings its calibration history with it
+(modulo domain relevance). Per-agent journals with a standard query contract
+are portable; a shared journal would have been a lock-in point.
 
 ---
 
