@@ -1,0 +1,55 @@
+{
+  "$schema": "https://adp-manifest.dev/schema/v0.json",
+  "proposal_id": "prp_01HMXK4F7G",
+  "deliberation_id": "dlb_01HMXJ3E9R",
+  "agent_id": "did:adp:test-runner-v2",
+  "timestamp": "2026-04-11T14:32:09.221Z",
+  "action": {
+    "kind": "merge_pull_request",
+    "target": "github.com/acme/api#4471",
+    "parameters": { "strategy": "squash" }
+  },
+  "vote": "approve",
+  "confidence": 0.86,
+  "domain_claim": {
+    "domain": "code.correctness",
+    "authority_source": "mcp-manifest:test-runner-v2#authorities"
+  },
+  "reversibility_tier": "partially_reversible",
+  "blast_radius": {
+    "scope": ["service:api", "consumers:web,mobile"],
+    "estimated_users_affected": 12000,
+    "rollback_cost_seconds": 90
+  },
+  "justification": {
+    "summary": "All 1,847 tests pass; coverage delta +0.3 pp; no flaky retries.",
+    "evidence_refs": [
+      "journal:dlb_01HMXJ.../evidence/test-run-9912",
+      "ci:github-actions/run/8821443"
+    ]
+  },
+  "stake": {
+    "declared_by": "self",
+    "magnitude": "high",
+    "calibration_at_stake": true
+  },
+  "dissent_conditions": [
+    {
+      "id": "dc_tr_01",
+      "condition": "if any test marked critical regresses",
+      "status": "active",
+      "amendments": [],
+      "tested_in_round": null,
+      "tested_by": null
+    },
+    {
+      "id": "dc_tr_02",
+      "condition": "if coverage delta is negative",
+      "status": "active",
+      "amendments": [],
+      "tested_in_round": null,
+      "tested_by": null
+    }
+  ],
+  "revisions": []
+}

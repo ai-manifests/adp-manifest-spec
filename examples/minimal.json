@@ -1,0 +1,34 @@
+{
+  "$schema": "https://adp-manifest.dev/schema/v0.json",
+  "proposal_id": "prp_minimal_001",
+  "deliberation_id": "dlb_example_001",
+  "agent_id": "did:adp:my-agent",
+  "timestamp": "2026-04-11T12:00:00.000Z",
+  "action": {
+    "kind": "restart_service",
+    "target": "service:web-app"
+  },
+  "vote": "approve",
+  "confidence": 0.75,
+  "domain_claim": {
+    "domain": "ops.availability",
+    "authority_source": "mcp-manifest:my-agent#authorities"
+  },
+  "reversibility_tier": "reversible",
+  "blast_radius": {
+    "scope": ["service:web-app"],
+    "estimated_users_affected": 0,
+    "rollback_cost_seconds": 5
+  },
+  "justification": {
+    "summary": "Service is in a degraded state; restart is low-risk.",
+    "evidence_refs": []
+  },
+  "stake": {
+    "declared_by": "self",
+    "magnitude": "low",
+    "calibration_at_stake": false
+  },
+  "dissent_conditions": [],
+  "revisions": []
+}

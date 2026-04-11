@@ -1,0 +1,46 @@
+{
+  "$schema": "https://adp-manifest.dev/schema/v0.json",
+  "proposal_id": "prp_01HMXK6C3D",
+  "deliberation_id": "dlb_01HMXJ3E9R",
+  "agent_id": "did:adp:style-linter-v1",
+  "timestamp": "2026-04-11T14:32:12.007Z",
+  "action": {
+    "kind": "merge_pull_request",
+    "target": "github.com/acme/api#4471",
+    "parameters": { "strategy": "squash" }
+  },
+  "vote": "approve",
+  "confidence": 0.62,
+  "domain_claim": {
+    "domain": "code.style",
+    "authority_source": "mcp-manifest:style-linter-v1#authorities"
+  },
+  "reversibility_tier": "partially_reversible",
+  "blast_radius": {
+    "scope": ["service:api"],
+    "estimated_users_affected": 12000,
+    "rollback_cost_seconds": 90
+  },
+  "justification": {
+    "summary": "2 minor naming convention deviations, both in non-public internals. No blocking issues.",
+    "evidence_refs": [
+      "lint:eslint/run/7782"
+    ]
+  },
+  "stake": {
+    "declared_by": "self",
+    "magnitude": "medium",
+    "calibration_at_stake": true
+  },
+  "dissent_conditions": [
+    {
+      "id": "dc_sl_01",
+      "condition": "if any public API name violates naming convention",
+      "status": "active",
+      "amendments": [],
+      "tested_in_round": null,
+      "tested_by": null
+    }
+  ],
+  "revisions": []
+}

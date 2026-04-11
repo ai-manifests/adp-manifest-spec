@@ -1,0 +1,54 @@
+{
+  "$schema": "https://adp-manifest.dev/schema/v0.json",
+  "proposal_id": "prp_01HMXK5A2B",
+  "deliberation_id": "dlb_01HMXJ3E9R",
+  "agent_id": "did:adp:security-scanner-v3",
+  "timestamp": "2026-04-11T14:32:11.443Z",
+  "action": {
+    "kind": "merge_pull_request",
+    "target": "github.com/acme/api#4471",
+    "parameters": { "strategy": "squash" }
+  },
+  "vote": "reject",
+  "confidence": 0.79,
+  "domain_claim": {
+    "domain": "security.policy",
+    "authority_source": "mcp-manifest:security-scanner-v3#authorities"
+  },
+  "reversibility_tier": "partially_reversible",
+  "blast_radius": {
+    "scope": ["service:api", "consumers:web,mobile"],
+    "estimated_users_affected": 12000,
+    "rollback_cost_seconds": 90
+  },
+  "justification": {
+    "summary": "Auth module has 3 code paths not covered by security-focused tests.",
+    "evidence_refs": [
+      "scan:sast/run/4410"
+    ]
+  },
+  "stake": {
+    "declared_by": "self",
+    "magnitude": "high",
+    "calibration_at_stake": true
+  },
+  "dissent_conditions": [
+    {
+      "id": "dc_ss_01",
+      "condition": "if any code path in auth module remains untested",
+      "status": "active",
+      "amendments": [],
+      "tested_in_round": null,
+      "tested_by": null
+    },
+    {
+      "id": "dc_ss_02",
+      "condition": "if no security-focused test covers the new token validation logic",
+      "status": "active",
+      "amendments": [],
+      "tested_in_round": null,
+      "tested_by": null
+    }
+  ],
+  "revisions": []
+}

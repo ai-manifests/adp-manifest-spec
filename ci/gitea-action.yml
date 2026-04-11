@@ -1,0 +1,23 @@
+# .gitea/workflows/validate-proposal.yml
+# Copy this file into your agent repo to validate ADP proposals on every push.
+
+name: Validate ADP Proposal
+
+on:
+  push:
+    paths:
+      - '**/*.proposal.json'
+
+jobs:
+  validate:
+    runs-on: linux
+    steps:
+      - name: Checkout
+        run: |
+          git clone "${{ github.server_url }}/${{ github.repository }}.git" .
+          git checkout ${{ github.sha }}
+
+      - name: Validate proposals against schema
+        run: |
+          npm install -g ajv-cli ajv-formats
+          find . -name '*.proposal.json' -exec ajv validate -s https://adp-manifest.dev/schema/v0.json -d {} \;
