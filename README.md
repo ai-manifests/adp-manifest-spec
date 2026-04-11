@@ -73,9 +73,14 @@ A2A / AGNTCY        ← transport, discovery, identity
 
 mcp-manifest declares **what** an agent can do. ADP declares **how** agents agree on doing it together.
 
-## Reference Implementation
+## Reference Implementations
 
-A C# reference library implementing the spec types, weighting function, and deliberation orchestrator is available at [adp-ref-lib](https://git.marketally.com/logikonline/adp-ref-lib).
+| Repo | Language | What it provides |
+|------|----------|-----------------|
+| [adp-ref-lib](https://git.marketally.com/logikonline/adp-ref-lib) | C# | Spec types, weighting function, deliberation orchestrator |
+| [adp-ref-lib-py](https://git.marketally.com/logikonline/adp-ref-lib-py) | Python | Frozen dataclasses, weighting, orchestrator |
+| [adp-ref-lib-ts](https://git.marketally.com/logikonline/adp-ref-lib-ts) | TypeScript | Discriminated unions, weighting, orchestrator |
+| [adp-federation-prototype](https://git.marketally.com/logikonline/adp-federation-prototype) | TypeScript | Full P2P federation with MCP tools, Ed25519 signing, and a plugin system for triggers, outcomes, and evaluators |
 
 ## Status
 
