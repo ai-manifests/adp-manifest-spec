@@ -989,8 +989,11 @@ it consumes or feeds them.
 
 ```
 ┌─────────────────────────────────┐
-│        Journal Spec             │  ← calibration history, commit log
-│   (forthcoming, referenced)     │
+│            ACB                  │  ← cognitive budget, settlement
+│   (acb-manifest.dev, optional)  │
+├─────────────────────────────────┤
+│            ADJ                  │  ← calibration history, commit log
+│         (adj-manifest.dev)      │
 ├─────────────────────────────────┤
 │     ADP — this spec             │  ← proposal → weight → converge → commit
 ├─────────────────────────────────┤
@@ -1003,13 +1006,56 @@ it consumes or feeds them.
 | Spec | Relationship |
 |---|---|
 | **mcp-manifest** | Provides `domain_claim.authority_source`. ADP reads domain authority; mcp-manifest defines it. |
-| **Journal spec** | Provides `CalibrationSource` data (calibration scores, sample sizes, staleness). ADP reads calibration; the journal computes it from outcome history. ADP writes commit records to the journal on termination. |
+| **ADJ** | Provides `CalibrationSource` data (calibration scores, sample sizes, staleness). ADP reads calibration; ADJ computes it from outcome history. ADP writes commit records to the journal on termination. |
+| **ACB** | Optional cognitive-budget layer. ACB reads ADP's disagreement-magnitude signal to decide whether the cheap or expensive routine applies. ADP-only deployments function unchanged; ACB-aware deployments require the v0.1 hook described in Section 10.1. |
 | **A2A / AGNTCY** | Provides transport and agent discovery. ADP assumes agents can already exchange messages; these specs define how. |
 | **PostMortem** | Conceptual ancestor. PostMortem's single-agent JSONL incident format informs the journal spec's multi-agent commit log. The calibration loop generalizes PostMortem's "compare prediction to outcome" pattern from one agent to many. |
 
 The composition seam between mcp-manifest and ADP is deliberate: mcp-manifest
 declares **what** an agent can do, ADP declares **how** agents agree on doing
 it together. These are the two sides of the same surface area.
+
+### 10.1 v0.1 Hook for ACB: `tally_observed`
+
+ACB v0 prices a deliberation by reading the disagreement magnitude computed
+from the *initial* tally — the tally taken before any belief-update round
+has run. ADP v0 already exposes `approve_weight`, `reject_weight`, and
+`abstain_weight` in `deliberation_closed.final_tally`, but that is the final
+tally, not the initial one. ACB-aware deployments need the same shape at
+each round boundary so they can decide whether the expensive routine should
+unlock before the next round runs.
+
+ADP v0.1 RECOMMENDS emitting a `tally_observed` event at each round boundary,
+including round 0 (the initial tally). The event carries the same shape as
+`deliberation_closed.final_tally`:
+
+```json
+{
+  "event": "tally_observed",
+  "deliberation_id": "dlb_01HMXJ3E9R",
+  "round": 0,
+  "tally": {
+    "approve_weight": 0.71,
+    "reject_weight": 0.64,
+    "abstain_weight": 0.18,
+    "total_weight": 1.53,
+    "approval_fraction": 0.526,
+    "participation_fraction": 0.882,
+    "threshold": 0.60
+  },
+  "timestamp": "2026-04-11T14:33:00.000Z"
+}
+```
+
+This is a non-disruptive addition to ADP's convergence step. It is useful to
+ADP on its own terms — better round-gating reduces wasted belief-update
+cycles by letting runners detect "low-signal outlier" tallies that should
+not escalate — and it is the only ADP-side hook ACB requires. ADP runners
+that no implementation listens to can no-op the event.
+
+Implementations MAY also expose the `tally_observed` event as an MCP tool
+return value or as a Server-Sent Events stream on the deliberation runner's
+HTTP surface. The transport is not specified.
 
 ---
 
