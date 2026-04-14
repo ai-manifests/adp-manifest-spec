@@ -77,7 +77,7 @@ mcp-manifest declares **what** an agent can do. ADP declares **how** agents agre
 
 | Repo | Language | What it provides |
 |------|----------|-----------------|
-| [adp-ref-lib](https://git.marketally.com/ai-manifests/adp-ref-lib) | C# | Spec types, weighting function, deliberation orchestrator |
+| [adp-ref-lib-csharp](https://git.marketally.com/ai-manifests/adp-ref-lib-csharp) | C# | Spec types, weighting function, deliberation orchestrator |
 | [adp-ref-lib-py](https://git.marketally.com/ai-manifests/adp-ref-lib-py) | Python | Frozen dataclasses, weighting, orchestrator |
 | [adp-ref-lib-ts](https://git.marketally.com/ai-manifests/adp-ref-lib-ts) | TypeScript | Discriminated unions, weighting, orchestrator |
 | [adp-federation-prototype](https://git.marketally.com/ai-manifests/adp-federation-prototype) | TypeScript | Full P2P federation with MCP tools, Ed25519 signing, and a plugin system for triggers, outcomes, and evaluators |
