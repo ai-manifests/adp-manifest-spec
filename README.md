@@ -1,5 +1,7 @@
 # adp-manifest specification
 
+_A specification by MarketAlly_
+
 A consensus protocol for autonomous agents — enabling calibration-weighted voting, reversibility-tiered thresholds, and structured belief-update rounds.
 
 ## The Problem
@@ -73,15 +75,17 @@ A2A / AGNTCY        ← transport, discovery, identity
 
 mcp-manifest declares **what** an agent can do. ADP declares **how** agents agree on doing it together.
 
-## Reference Implementations
+## Licensing Model
 
-| Repo | Language | What it provides |
-|------|----------|-----------------|
-| [adp-ref-lib-csharp](https://git.marketally.com/ai-manifests/adp-ref-lib-csharp) | C# | Spec types, weighting function, deliberation orchestrator |
-| [adp-ref-lib-py](https://git.marketally.com/ai-manifests/adp-ref-lib-py) | Python | Frozen dataclasses, weighting, orchestrator |
-| [adp-ref-lib-ts](https://git.marketally.com/ai-manifests/adp-ref-lib-ts) | TypeScript | Discriminated unions, weighting, orchestrator |
-| [adp-federation-prototype](https://git.marketally.com/ai-manifests/adp-federation-prototype) | TypeScript | Full P2P federation with MCP tools, Ed25519 signing, and a plugin system for triggers, outcomes, and evaluators |
+The ADP specification text is released under CC0 1.0 Universal (public domain dedication).
+Reference implementations, schemas, and tooling are released under the Apache 2.0 License.
+The specification is fully implementable without reliance on any specific implementation.
 
-## Status
+## Document Metadata 
 
-**v0 — Draft.** Feedback welcome via issues.
+- **Author**: David H Friedel Jr, , MarketAlly LLC
+- **Specification**: adp-manifest  
+- **Version**: v0 (Draft)  
+- **Status**: Public Draft  
+
+MarketAlly refers to affiliated entities including MarketAlly LLC (USA), MarketAlly Pte Ltd (Singapore), and MarketAlly OÜ (Estonia).
