@@ -83,7 +83,7 @@ The specification is fully implementable without reliance on any specific implem
 
 ## Document Metadata 
 
-- **Author**: David H Friedel Jr, , MarketAlly LLC
+- **Author**: David H Friedel Jr, , MarketAlly
 - **Specification**: adp-manifest  
 - **Version**: v0 (Draft)  
 - **Status**: Public Draft  
